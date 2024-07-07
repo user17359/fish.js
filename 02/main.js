@@ -40,8 +40,17 @@ function OnMouseMove(e){
 }
 
 var current_rotation = 0;
+
 var fish_rot_speed = 0.03;
+var fish_max_rot_acc = 0.05;
+var fish_step_rot_acc = 0.0001;
+var fish_current_rot_acc = 0.0;
+
 var fish_move_speed = 0.15;
+var fish_magnitude_speed_factor = 0.005;
+
+
+var direction = true;
 
 function animate() {
 
@@ -52,22 +61,46 @@ function animate() {
         var diff_rot = current_rotation - target_angle;
 
         while(diff_rot < -Math.PI){
-            diff_rot += 2 * Math.PI
+            diff_rot += 2 * Math.PI;
         }
         while(diff_rot > Math.PI){
-            diff_rot -= 2 * Math.PI
+            diff_rot -= 2 * Math.PI;
         }
 
         if(diff_rot > 0){
-            koi_fish.rotateX(fish_rot_speed);
-            current_rotation -= fish_rot_speed;
+            if(direction){
+                if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
+                    fish_current_rot_acc += fish_step_rot_acc;
+                }
+                else {
+                    fish_current_rot_acc = fish_max_rot_acc;
+                }
+            }
+            else {
+                fish_current_rot_acc = 0.0;
+            }
+            koi_fish.rotateX(fish_rot_speed + fish_current_rot_acc);
+            current_rotation -= (fish_rot_speed + fish_current_rot_acc);
+            direction = true;
         }
         else {
-            koi_fish.rotateX(-fish_rot_speed);
-            current_rotation += fish_rot_speed;
+            if(!direction){
+                if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
+                    fish_current_rot_acc += fish_step_rot_acc;
+                }
+                else {
+                    fish_current_rot_acc = fish_max_rot_acc;
+                }
+            }
+            else {
+                fish_current_rot_acc = 0.0;
+            }
+            koi_fish.rotateX(-(fish_rot_speed + fish_current_rot_acc));
+            current_rotation += (fish_rot_speed + fish_current_rot_acc);
+            direction = false;
         }
 
-        koi_fish.translateZ(fish_move_speed);
+        koi_fish.translateZ(fish_move_speed + koi_fish.position.distanceTo(mouse) * fish_magnitude_speed_factor);
     }
 
 	renderer.render( scene, camera );
