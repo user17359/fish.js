@@ -8,9 +8,20 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 const geometry = new THREE.BoxGeometry( 2, 2, 2 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+const texture = new THREE.TextureLoader().load("textures/fish.jpg")
+
+const material = new THREE.MeshBasicMaterial({
+    map: texture
+});
+
 const cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
+
+const pointLight = new THREE.PointLight(0xFFFFFF)
+scene.add( pointLight )
+
+scene.background = new THREE.Color(0x7788ff)
 
 camera.position.z = 5;
 
