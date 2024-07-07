@@ -9,7 +9,7 @@ document.body.appendChild( renderer.domElement );
 
 const geometry = new THREE.BoxGeometry( 2, 2, 2 );
 
-const texture = new THREE.TextureLoader().load("textures/fish.jpg")
+const texture = new THREE.TextureLoader().load("/textures/fish.jpg")
 
 const material = new THREE.MeshBasicMaterial({
     map: texture
