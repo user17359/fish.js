@@ -16,6 +16,7 @@ const loader = new FBXLoader();
 
 loader.load( '/models/Koi_Tri.fbx', function ( object ) {
     object.rotateY(Math.PI/2)
+    object.translateX(10)
     object.scale.set(.015, .015, .015)
     object.name = "koi_fish"
 	scene.add( object );
@@ -49,8 +50,11 @@ var fish_current_rot_acc = 0.0;
 var fish_move_speed = 0.15;
 var fish_magnitude_speed_factor = 0.005;
 
-
 var direction = true;
+var flip = true;
+
+var current_y_steps = 0;
+var y_steps = 30;
 
 function animate() {
 
@@ -59,6 +63,8 @@ function animate() {
     if(koi_fish) {
         var target_angle = Math.atan2(mouse.y - koi_fish.position.y, mouse.x - koi_fish.position.x);
         var diff_rot = current_rotation - target_angle;
+        
+        console.log(current_rotation)
 
         while(diff_rot < -Math.PI){
             diff_rot += 2 * Math.PI;
@@ -67,40 +73,64 @@ function animate() {
             diff_rot -= 2 * Math.PI;
         }
 
-        if(diff_rot > 0){
-            if(direction){
-                if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
-                    fish_current_rot_acc += fish_step_rot_acc;
-                }
-                else {
-                    fish_current_rot_acc = fish_max_rot_acc;
-                }
-            }
-            else {
-                fish_current_rot_acc = 0.0;
-            }
-            koi_fish.rotateX(fish_rot_speed + fish_current_rot_acc);
-            current_rotation -= (fish_rot_speed + fish_current_rot_acc);
-            direction = true;
+        if(current_y_steps == 0 && flip && (target_angle < -Math.PI / 2 || target_angle > Math.PI / 2)) {
+            current_y_steps = y_steps;
+            flip = false;
         }
-        else {
-            if(!direction){
-                if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
-                    fish_current_rot_acc += fish_step_rot_acc;
-                }
-                else {
-                    fish_current_rot_acc = fish_max_rot_acc;
-                }
-            }
-            else {
-                fish_current_rot_acc = 0.0;
-            }
-            koi_fish.rotateX(-(fish_rot_speed + fish_current_rot_acc));
-            current_rotation += (fish_rot_speed + fish_current_rot_acc);
-            direction = false;
+        else if(current_y_steps == 0 && !flip && (target_angle >= -Math.PI / 2 && target_angle <= Math.PI / 2)) {
+            current_y_steps = y_steps;
+            flip = true;
         }
 
-        koi_fish.translateZ(fish_move_speed + koi_fish.position.distanceTo(mouse) * fish_magnitude_speed_factor);
+        if(current_y_steps != 0){
+            current_y_steps -= 1;
+            if(flip){
+                koi_fish.rotateY(Math.PI / y_steps);
+            }
+            else{
+                koi_fish.rotateY(-Math.PI / y_steps);
+            }
+        }
+        else{
+            if(diff_rot > 0){
+                if(direction){
+                    if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
+                        fish_current_rot_acc += fish_step_rot_acc;
+                    }
+                    else {
+                        fish_current_rot_acc = fish_max_rot_acc;
+                    }
+                }
+                else {
+                    fish_current_rot_acc = 0.0;
+                }
+                koi_fish.rotateX(fish_rot_speed + fish_current_rot_acc);
+                
+                if(flip) current_rotation -= (fish_rot_speed + fish_current_rot_acc);
+                else current_rotation += (fish_rot_speed + fish_current_rot_acc);
+        
+                direction = true;
+            }
+            else {
+                if(!direction){
+                    if(fish_current_rot_acc + fish_step_rot_acc < fish_max_rot_acc){
+                        fish_current_rot_acc += fish_step_rot_acc;
+                    }
+                    else {
+                        fish_current_rot_acc = fish_max_rot_acc;
+                    }
+                }
+                else {
+                    fish_current_rot_acc = 0.0;
+                }
+                koi_fish.rotateX(-(fish_rot_speed + fish_current_rot_acc));
+                if(flip) current_rotation += (fish_rot_speed + fish_current_rot_acc);
+                else current_rotation -= (fish_rot_speed + fish_current_rot_acc);
+                direction = false;
+            }
+
+            koi_fish.translateZ(fish_move_speed + koi_fish.position.distanceTo(mouse) * fish_magnitude_speed_factor);
+        }
     }
 
 	renderer.render( scene, camera );
